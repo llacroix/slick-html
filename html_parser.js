@@ -52,6 +52,7 @@ function parse_attribute(data) {
       value = ['']
     }
 
+
     let attr = new Attribute(name, value);
 
     return [attr, data];
@@ -60,7 +61,7 @@ function parse_attribute(data) {
 function parse_attributes(data) {
     // Parse attributes
     let attributes = []
-    let attribute
+    let _, attribute
 
     // while parse as many attributes as long as it doesn't
     // reach a closing tag with > or /
@@ -70,8 +71,10 @@ function parse_attributes(data) {
         }
 
         [attribute, data] = parse_attribute(data);
-
         attributes.push(attribute);
+
+        // consume all following spaces until next important token
+        [_, data] = take_while(data, [' ']);
     }
 
     return [attributes, data]

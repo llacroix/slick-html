@@ -159,6 +159,7 @@ export class Element {
     render(params) {
       const EVENT_ATTRIBUTES = [
         "click",
+        "change",
       ];
 
       let tag = this.name.render(params)
