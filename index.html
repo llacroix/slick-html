@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+  <head>
+    <script type="importmap">
+      {
+        "imports": {
+          "parser": "./parser.js"
+        }
+      }
+    </script>
+    <script type="module">
+      import {h, normalizer} from './parser.js';
+      window.normalizer = normalizer;
+      window.h = h;
+
+      class SuperComponent extends HTMLElement{
+        
+        constructor() {
+          super();
+          this.root = this.attachShadow({mode: 'open'})
+          this.nodes = []
+
+          this.request_update()
+        }
+
+        update() {
+          let template = this.render()
+
+          this.nodes.forEach((node) => {
+            this.root.removeChild(node)
+          });
+
+          this.nodes = template.render()
+
+          this.nodes.forEach((node) => {
+            this.root.appendChild(node)
+          })
+        }
+
+        request_update() {
+          window.requestAnimationFrame(() => {
+            this.update()
+          })
+        }
+      }
+
+      class Component extends SuperComponent {
+        constructor() {
+          super();
+          this.title = this.getAttribute('title')
+          this.content = 'ty';
+          this.rows = []
+        }
+
+        add_row() {
+          this.rows.push('abc')
+          this.request_update()
+        }
+
+        render() {
+          let attribute = "checked"
+          let some_elem = document.createTextNode('hey oh')
+
+          return h`
+          <div>
+            <input type="checkbox" ${attribute} />
+            <div class="title">${this.title}</div>
+            <div class="body">
+              ${this.content}
+              <div class="rows">
+              ${this.rows.map((row) => h`<div class="row">${row}</div>`)}
+              </div>
+              <div click=${(event) => this.add_row()}>${some_elem}</div>
+            </div>
+          </div>
+          `;
+        }
+      }
+
+      window.customElements.define('c-1', Component)
+    </script>
+  </head>
+  <body>
+    <c-1 some_value="2"></c-1>
+    <c-1 some_value="1"></c-1>
+  </body>
+</html>
