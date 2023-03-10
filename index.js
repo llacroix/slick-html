@@ -53,8 +53,6 @@ class Component extends SuperComponent {
   }
 
   render() {
-    let attribute = "checked"
-
     let some_elem = document.createTextNode('Add Row!')
 
     return h`
