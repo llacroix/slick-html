@@ -1,4 +1,4 @@
-import {take_until_quoted, take_one, take_until, take_while, take_until_cb} from './parsing.js'
+import {take_until_quoted, take_one, take_until, take_while, take_until_cb, collapse} from './parsing.js'
 import {Element, Tag, TextNode, Attribute, ParamNode, ParamRef} from './objects.js';
 
 class StopParse {
@@ -14,6 +14,8 @@ function parse_tag(data) {
 
     [_, data] = take_while(data, [' ']);
     [name, data] = take_until(data, [' ', '>', '/']);
+
+    name = collapse(name)
 
     return [new Tag(name), data];
 }
@@ -52,6 +54,9 @@ function parse_attribute(data) {
       value = ['']
     }
 
+    // cleanup what got parsed
+    name = collapse(name)
+    value = collapse(value)
 
     let attr = new Attribute(name, value);
 
@@ -182,6 +187,8 @@ function parse_text_node(data) {
         }
       }
     );
+
+    text = collapse(text)
     return [new TextNode(text), data];
 }
 

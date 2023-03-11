@@ -6,6 +6,7 @@ class SuperComponent extends HTMLElement{
     super();
     this.root = this.attachShadow({mode: 'open'})
     this.nodes = []
+    this.cache = new Map()
 
     this.request_update()
   }
@@ -17,7 +18,7 @@ class SuperComponent extends HTMLElement{
       this.root.removeChild(node)
     });
 
-    this.nodes = template.render()
+    this.nodes = template.render(this.cache)
 
     this.nodes.forEach((node) => {
       this.root.appendChild(node)
@@ -56,6 +57,7 @@ class Component extends SuperComponent {
     let some_elem = document.createTextNode('Add Row!')
 
     return h`
+    <input type="text" />
     <div>
       <div class="title"><h1>${this.title}</h1></div>
       <div class="body">

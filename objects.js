@@ -15,8 +15,8 @@ export class Template {
     )
   }
 
-  to_dom() {
-    let nodes = this.render()
+  to_dom(cache) {
+    let nodes = this.render(cache)
     let fragment = document.createDocumentFragment()
     for (let node of nodes) {
       fragment.appendChild(node)
@@ -24,8 +24,11 @@ export class Template {
     return fragment
   }
 
-  render() {
-    return this.nodes.map((node) => node.render(this.params))
+  render(cache) {
+    return this.nodes.map((node) => {
+      let result = node.render(this.params, cache)
+      return result 
+    })
   }
 
   update(params) {
@@ -44,14 +47,14 @@ export class ParamRef {
     this.position = position
   }
 
-  render(params) {
+  render(params, cache) {
     let value = this.get_value(params)
-    return value.render(params)
+    return value.render(params, cache)
   }
 
-  render_string(params) {
+  render_string(params, cache) {
     let value = this.get_value(params)
-    return value.render_string(params)
+    return value.render_string(params, cache)
   }
 
   get_value(params) {
@@ -85,7 +88,7 @@ export class Param {
       return this.value
     }
 
-    render(params) {
+    render(params, cache) {
       let root = document.createDocumentFragment()
 
       let values = (
@@ -102,7 +105,7 @@ export class Param {
         } else if (elem instanceof HTMLElement) {
           node = elem;
         } else if (elem instanceof Template) {
-          node = elem.to_dom();
+          node = elem.to_dom(cache);
         } else {
           node = document.createTextNode(elem.toString());
         }
@@ -131,10 +134,10 @@ export class Tag {
       return this.value.join("")
     }
 
-    render(params) {
+    render(params, cache) {
       return this.value.reduce((acc, val) => {
         if (val instanceof ParamRef) {
-          return acc + val.render_string(params);
+          return acc + val.render_string(params, cache);
         } else {
           return acc + val;
         }
@@ -156,17 +159,17 @@ export class Element {
       return new Element(name, attributes, children)
     }
 
-    render(params) {
+    render(params, cache) {
       const EVENT_ATTRIBUTES = [
         "click",
         "change",
       ];
 
-      let tag = this.name.render(params)
+      let tag = this.name.render(params, cache)
       let elem = document.createElement(tag)
 
       for (let attribute of this.attributes) {
-        let name = attribute.render_name(params)
+        let name = attribute.render_name(params, cache)
 
         if (EVENT_ATTRIBUTES.indexOf(name) >= 0) {
           elem.addEventListener(
@@ -174,13 +177,13 @@ export class Element {
             attribute.get_callable(params)
           );
         } else {
-          let value = attribute.render_value(params)
+          let value = attribute.render_value(params, cache)
           elem.setAttribute(name, value);
         }
       }
 
       for (let child of this.children) {
-        let sub = child.render(params)
+        let sub = child.render(params, cache)
         elem.appendChild(sub)
       }
 
@@ -229,9 +232,9 @@ export class Attribute {
       return value.value
     }
 
-    render(params) {
-        let name = render_string(this.name, params)
-        let value = render_string(this.value, params)
+    render(params, cache) {
+        let name = render_string(this.name, params, cache)
+        let value = render_string(this.value, params, cache)
         let attribute = document.createAttribute(name)
         attribute.value = value
         return attribute
@@ -267,7 +270,7 @@ export class TextNode {
       )
     }
 
-    render(params) {
+    render(params, cache) {
       let result = this.value.join("")
       return document.createTextNode(result) 
     }
@@ -286,7 +289,8 @@ export class ParamNode {
     return new ParamNode(this.data.clone())
   }
 
-  render(params) {
-    return this.data.render(params)
+  render(params, cache) {
+    let result = this.data.render(params, cache)
+    return result
   }
 }

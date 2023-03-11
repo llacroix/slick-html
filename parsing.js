@@ -2,6 +2,19 @@ export function take_one(data) {
     return [data[0], data.slice(1)];
 }
 
+export function collapse(list) {
+  return list.reduce((acc, val) => {
+    let last_elem = acc[acc.length-1]
+
+    if (typeof last_elem == 'string' && typeof val == 'string') {
+      acc[acc.length-1] = last_elem + val
+    } else {
+      acc.push(val)
+    }
+
+    return acc
+  }, [])
+}
 
 export function take_while(data, chars) {
     let idx = 0
