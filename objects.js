@@ -102,6 +102,9 @@ export class Param {
 
     update(val) {
       this.value = val;
+      if (this.onchange) {
+        this.onchange()
+      }
     }
 
     toString() {
@@ -198,6 +201,25 @@ export class Element {
           );
         } else {
           let value = attribute.render_value(params, cache)
+          
+          let bound_params = attribute.bound_params(params)
+
+          // TODO make a more generic way to bind changes to callbacks
+          // by trying to keep previous value and next value.
+          function callback(elem, attribute) {
+            return () => {
+              let name = attribute.render_name(params, cache)
+              let value = attribute.render_value(params, cache)
+              elem.setAttribute(name, value)
+            }
+          }
+
+          // define some callback to update attributes based on name/value
+          // if any of the bound params does get updated.
+          bound_params.forEach((param) => {
+            param.onchange = callback(elem, attribute)
+          })
+
           elem.setAttribute(name, value);
         }
       }
@@ -236,6 +258,12 @@ export class Attribute {
         this.name.slice(0),
         this.value.slice(0)
       )
+    }
+
+    bound_params(params) {
+      return this.value.concat(this.name)
+              .filter(val => val instanceof ParamRef)
+              .map(ref => ref.get_value(params))
     }
 
     render_name(params) {
