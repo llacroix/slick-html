@@ -3,20 +3,37 @@ function reprl(value) {
 }
 
 export class Template {
-  constructor(nodes, params) {
+  constructor(nodes) {
     this.nodes = nodes
-    this.params = params
   }
 
-  clone() {
+  proxy(params) {
+    return new TemplateCache(this, params)
+    //return new TemplateCache(this, this.params.map((param) => param.clone()))
+    /*
     return new Template(
       this.nodes.map((node) => node.clone()),
       this.params.map((param) => param.clone())
     )
+    */
   }
 
-  to_dom(cache) {
-    let nodes = this.render(cache)
+
+  render(cache, params) {
+    return this.nodes.map(node => node.render(params, cache))
+  }
+
+}
+
+export class TemplateCache {
+  constructor(template, params) {
+    this.template = template
+    this.params = params
+    this.cache = new Map()
+  }
+
+  to_dom() {
+    let nodes = this.render(this.cache, this.params)
     let fragment = document.createDocumentFragment()
     for (let node of nodes) {
       fragment.appendChild(node)
@@ -24,11 +41,14 @@ export class Template {
     return fragment
   }
 
-  render(cache) {
+  render() {
+    return this.template.render(this.cache, this.params)
+    /*
     return this.nodes.map((node) => {
       let result = node.render(this.params, cache)
       return result 
     })
+    */
   }
 
   update(params) {
@@ -104,8 +124,8 @@ export class Param {
           node = elem;
         } else if (elem instanceof HTMLElement) {
           node = elem;
-        } else if (elem instanceof Template) {
-          node = elem.to_dom(cache);
+        } else if (elem instanceof TemplateCache) {
+          node = elem.to_dom();
         } else {
           node = document.createTextNode(elem.toString());
         }

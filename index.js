@@ -5,23 +5,42 @@ class SuperComponent extends HTMLElement{
   constructor() {
     super();
     this.root = this.attachShadow({mode: 'open'})
+    this._template = null;
     this.nodes = []
-    this.cache = new Map()
+    // this.cache = new Map()
 
-    this.request_update()
+    this.request_init_update()
   }
 
   update() {
+    // update params for template
     let template = this.render()
 
+    /*
     this.nodes.forEach((node) => {
       this.root.removeChild(node)
     });
+    */
 
-    this.nodes = template.render(this.cache)
+    this._template.update(template.params)
+
+    /*
+    this.nodes = this._template.render()
 
     this.nodes.forEach((node) => {
       this.root.appendChild(node)
+    })
+    */
+  }
+
+  request_init_update() {
+    window.requestAnimationFrame(() => {
+      this._template = this.render()
+      this.nodes = this._template.render()
+      this.nodes.forEach((node) => {
+        this.root.appendChild(node)
+      })
+      // this.update()
     })
   }
 
@@ -40,11 +59,13 @@ class Component extends SuperComponent {
     this.rows = []
     this.input_type = "input"
     this.is_checked = "checked"
+    this.type = "text"
   }
 
   add_row() {
     this.rows.push('abc')
     this.is_checked = this.is_checked == 'checked' ? 'unchecked' : 'checked'
+    this.type = this.type == 'text' ? 'date' : 'text'
     this.request_update()
   }
 
@@ -57,7 +78,7 @@ class Component extends SuperComponent {
     let some_elem = document.createTextNode('Add Row!')
 
     return h`
-    <input type="text" />
+    <input type="${this.type}" />
     <div>
       <div class="title"><h1>${this.title}</h1></div>
       <div class="body">

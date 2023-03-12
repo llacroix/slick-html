@@ -34,11 +34,11 @@ export function h() {
       template_params.map((par) => par.ref())
     );
     let nodes = parse_html(result);
-    let template = new Template(nodes, template_params);
+    let template = new Template(nodes);
     existing_templates[template_string] = template;
   }
 
-  let cur_template = existing_templates[template_string].clone()
-  cur_template.update(template_params)
+  let cur_template = existing_templates[template_string].proxy(template_params)
+  // cur_template.update(template_params)
   return cur_template
 }
