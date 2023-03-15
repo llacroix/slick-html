@@ -101,9 +101,12 @@ export class Param {
     }
 
     update(val) {
-      this.value = val;
+      let new_value = val
+      let old_value = this.value
+      this.value = new_value;
+
       if (this.onchange) {
-        this.onchange()
+        this.onchange(new_value, old_value)
       }
     }
 
@@ -111,33 +114,6 @@ export class Param {
       return this.value
     }
 
-    render(params, cache) {
-      let root = document.createDocumentFragment()
-
-      let values = (
-        this.value instanceof Array
-        ? this.value
-        : [this.value]
-      );
-
-      for (let elem of values) {
-        let node
-
-        if (elem.nodeType == 3) {
-          node = elem;
-        } else if (elem instanceof HTMLElement) {
-          node = elem;
-        } else if (elem instanceof TemplateCache) {
-          node = elem.to_dom();
-        } else {
-          node = document.createTextNode(elem.toString());
-        }
-
-        root.appendChild(node)
-      }
-
-      return root
-    }
 
     render_string(params) {
       return render_string(this.value, params)
@@ -288,6 +264,7 @@ export class Attribute {
         return attribute
     }
 
+    /*
     to_dom() {
       let name = this.name.join("")
       let value = this.value.join("")
@@ -299,6 +276,7 @@ export class Attribute {
 
       return this.node
     }
+    */
 }
 
 export class TextNode {
@@ -309,12 +287,6 @@ export class TextNode {
     clone() {
       return new TextNode(
         this.value.slice(0)
-      )
-    }
-
-    to_dom() {
-      return document.createTextNode(
-        this.value.join("")
       )
     }
 
@@ -329,16 +301,75 @@ export class ParamNode {
     this.data = data
   }
 
-  to_dom() {
-    return this.data.to_dom()
-  }
-
   clone() {
     return new ParamNode(this.data.clone())
   }
 
+  /*
   render(params, cache) {
     let result = this.data.render(params, cache)
     return result
+  }
+  */
+
+  render(params, cache) {
+    let value = this.data.get_value(params)
+
+    // Refactor params to contain concrete values
+    // by pre mapping them when template is created
+    // or have different type of params like
+    //
+    // ArrayParam
+    // StringParam
+    // ...
+    // 
+    // All of those should implement a simple render interface.
+    let values = (
+      value.value instanceof Array
+      ? value.value
+      : [value.value]
+    );
+
+    let start_node = document.createTextNode("")
+    let end_node = document.createTextNode("")
+    let res_nodes = [start_node]
+
+    // refactor to avoid looping 
+    for (let elem of values) {
+      let node
+
+      // text node
+      if (elem.nodeType == 3 || elem instanceof HTMLElement) {
+        node = elem;
+
+        res_nodes.push(elem)
+      } else if (elem instanceof TemplateCache) {
+        let nodes = elem.render();
+        node = document.createDocumentFragment()
+        nodes.forEach((nod) => node.appendChild(nod))
+        res_nodes = [...res_nodes, ...nodes]
+      } else {
+        node = document.createTextNode(elem.toString());
+        res_nodes.push(node)
+      }
+    }
+
+    res_nodes.push(end_node)
+
+    function callback(value) {
+      return () => {
+        debugger;
+      }
+    }
+
+    if (value.value instanceof Array) {
+      value.onchange = callback(value)
+    }
+
+    // value.onchange = callback(values
+    let root = document.createDocumentFragment()
+    res_nodes.forEach(node => root.appendChild(node))
+
+    return root
   }
 }
