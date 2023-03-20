@@ -1,5 +1,5 @@
 import {parse_html} from './html_parser.js';
-import {Template, Param} from './objects.js';
+import {Template, Param, ParamList} from './objects.js';
 
 export function normalizer(template, params) {
     return template.map((val, idx, lst) => {
@@ -23,7 +23,13 @@ export function h() {
   let params = Array.from(arguments)
 
   let template_params = params.slice(1).map(
-    (param, idx) => new Param(idx, param)
+    (param, idx) => {
+      if (param instanceof Array) {
+        return new ParamList(idx, param)
+      } else {
+        return new Param(idx, param)
+      }
+    }
   );
 
   let template_string = params[0].join('~~~')

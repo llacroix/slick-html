@@ -1,0 +1,11 @@
+{
+  "name": "slick-html",
+  "type": "module",
+  "exports": "src/main.js",
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0"
+  }
+}

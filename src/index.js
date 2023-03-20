@@ -38,7 +38,9 @@ class SuperComponent extends HTMLElement{
       this._template = this.render()
       this.nodes = this._template.render()
       this.nodes.forEach((node) => {
-        this.root.appendChild(node)
+        node.forEach(node => {
+          this.root.appendChild(node)
+        })
       })
       // this.update()
     })
@@ -56,14 +58,14 @@ class Component extends SuperComponent {
     super();
     this.title = this.getAttribute('title')
     this.content = 'ty';
-    this.rows = []
+    this.rows = ["hey"]
     this.input_type = "input"
     this.is_checked = "checked"
     this.type = "text"
   }
 
   add_row() {
-    this.rows.push('abc')
+    this.rows.push('abc' + this.rows.length)
     this.is_checked = this.is_checked == 'checked' ? 'unchecked' : 'checked'
     this.type = this.type == 'text' ? 'date' : 'text'
     this.request_update()
@@ -74,14 +76,48 @@ class Component extends SuperComponent {
     this.request_update()
   }
 
+  remove_row(idx) {
+    // let index = this.rows.indexOf(row)
+    // this.rows.splice(idx, 1)
+    this.rows = this.rows.slice(0, idx).concat(this.rows.slice(idx+1))
+    this.request_update()
+  }
+
   render() {
     let some_elem = document.createTextNode('Add Row!')
 
     return h`
-    <input type="${this.type}" />
-    <div>
-      <div class="title"><h1>${this.title}</h1></div>
-      <div class="body">
+    <style>
+      @import '/static/index.css';      
+
+      .block {
+        display: block; 
+        padding: 1em;
+        border: 1px solid;
+        margin: 1em;
+      }
+
+      .rows .odd {
+        background-color: #ccc;
+      }
+
+      .rows .even {
+        background-color: #aaa;
+      }
+
+      .rows .row {
+        display: flex;
+      }
+      .rows .row  * {
+        flex: 1;
+      }
+    </style>
+    <div class="block">
+      <div class="title">
+        <h1><input type=${this.type} /></h1>
+        <h2>${this.title}</h2>
+      </div>
+      <div class="content">
         <input type="checkbox" ${this.is_checked} />
         <select change=${(event) => this.onchange_selection(event)} >
           <option>Select A Value</option>
@@ -90,10 +126,18 @@ class Component extends SuperComponent {
         </select>
         <${this.input_type}></${this.input_type}>
         ${this.content}
-        <button click=${(event) => this.add_row()}>${some_elem}</button>
         <div class="rows">
-        ${this.rows.map((row) => h`<div class="row">${row}</div>`)}
+        ${this.rows.map((row, idx) => h`
+          <div class="row ${idx % 2 == 0 ? 'odd': 'even'}">
+            <div>${row}</div>
+            <input type="text" />
+            <button click=${(event) => this.remove_row(idx)}>Remove</button>
+          </div>
+          `
+        )}
         </div>
+        <button click=${(event) => this.add_row()}>${some_elem}</button>
+
       </div>
     </div>
     `;
