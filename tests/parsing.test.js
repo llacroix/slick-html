@@ -1,5 +1,7 @@
 import {normalizer} from 'slick-html/parser';
-import {collapse, take_one, take_while, take_until, take_until_quoted} from 'slick-html/parsing';
+import {
+  collapse, take_one, take_while, take_until, take_until_quoted, take_until_cb
+} from 'slick-html/parsing';
 
 
 test('take_one', () => {
@@ -85,4 +87,32 @@ test('take_until_quoted', () => {
     [],
     ['"', 'a', 'b', 'c', '"']
   ])
+
+  expect(take_until_quoted(
+    normalizer(['abc"'], []),
+    '"'
+  )).toStrictEqual([
+    ['a', 'b', 'c'],
+    ['"']
+  ])
+
+  expect(take_until_quoted(
+    normalizer(['ab\\"c"'], []),
+    '"'
+  )).toStrictEqual([
+    ['a', 'b', '\\', '"', 'c'],
+    ['"']
+  ])
+
+})
+
+test('take_until_cb', () => {
+  expect(take_until_cb(
+    normalizer(['"abc"'], []),
+    (chr) => chr != 'b'
+  )).toStrictEqual([
+    ['"', 'a'],
+    ['b', 'c', '"']
+  ])
+
 })

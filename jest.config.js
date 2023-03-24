@@ -4,7 +4,9 @@ const config = {
     // "modulePaths": ["<rootDir>/src"],
     "moduleNameMapper": {
       "slick-html/(.*)": "<rootDir>/src/$1",
-    }
+    },
+    
+    "collectCoverage": true,
 }
 
 export default config

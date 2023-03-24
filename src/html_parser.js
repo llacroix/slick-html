@@ -35,6 +35,8 @@ function parse_attribute(data) {
     if (data[0] == '=') {
       [_, data] = take_one(data);
 
+      [_, data] = take_while(data, [' ']);
+
       // if the attribute is in the form of
       // A="B" do not glob the quotes
       if (["'", '"'].indexOf(data[0]) >= 0) {
@@ -46,7 +48,7 @@ function parse_attribute(data) {
         [quote_char, data] = take_one(data);
       } else {
         // Otherwise parse anything until the next space.
-        [value, data] = take_until(data, [' ', '>']);
+        [value, data] = take_until(data, [' ', '>', '/']);
       }
     } else {
       // If the attribute is in the form of A default
