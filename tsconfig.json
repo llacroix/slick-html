@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "module": "ESNext",
+        "target": "ESNEXT",
+        "lib": ["ESNext"],
+        "moduleResolution": "Node",
+        "esModuleInterop": true,
+        "baseUrl": ".",
+        "paths": {
+            "slick-html/*": ["src/*"]
+        }
+    }
+}

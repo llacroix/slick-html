@@ -13,9 +13,14 @@
       import {main} from './src/index.js';
       main()
     </script>
+    <script type="module">
+      import {NodeElement} from './tss.js';
+      window.customElements.define('t-t', NodeElement)
+    </script>
   </head>
   <body>
     <c-1 title="Block 1"></c-1>
     <c-1 title="Block 2"></c-1>
+    <t-t></t-t>
   </body>
 </html>

@@ -1,4 +1,3 @@
-import {sum} from 'slick-html/main';
 import {normalizer} from 'slick-html/parser';
 
 
